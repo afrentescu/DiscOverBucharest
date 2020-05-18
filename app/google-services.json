@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "243242842839",
+    "firebase_url": "https://discoverbucharest-a5424.firebaseio.com",
+    "project_id": "discoverbucharest-a5424",
+    "storage_bucket": "discoverbucharest-a5424.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:243242842839:android:4f975bea2f685fa9",
+        "android_client_info": {
+          "package_name": "com.example.user.discoverbucharest"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "243242842839-5khgtl00h74o4kfdprkf8ilnqkqt32ig.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.user.discoverbucharest",
+            "certificate_hash": "d44b2a7fab320cb46332d56e631a4c0af8c1991c"
+          }
+        },
+        {
+          "client_id": "243242842839-oo11bsqbn6n3hk1be91vu0uip66j4kfi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAfAO-wCq4oNSwmBA-NVpKhSu9nVZZtbcQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "243242842839-oo11bsqbn6n3hk1be91vu0uip66j4kfi.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,45 @@
+<resources>
+    <string name="app_name">DiscOverBucharest</string>
+    <string name="name">Name</string>
+    <string name="surname">Surname</string>
+    <string name="email">Email</string>
+    <string name="country">Country</string>
+    <string name="password">Password</string>
+    <string name="create">CREATE</string>
+    <string name="username">username</string>
+    <string name="log_in">LOG IN</string>
+    <string name="username2">Username</string>
+    <string name="enter_tour_maxim_budget">Enter tour MAXIM budget</string>
+    <string name="enter_your_minimum_budget">Enter your MINIMUM budget</string>
+    <string name="enter_how_much_you_have_spent_today">Enter how much you have spent </string>
+    <string name="you_have_left">You have left:</string>
+    <string name="keep_track_of_your_budget">Keep track of your budget</string>
+    <string name="update_budget">update budget</string>
+    <string name="enter_your_maxim_budget" />
+    <string name="textview1">TextView</string>
+    <string name="textview2">TextView</string>
+    <string name="textview3">TextView</string>
+    <string name="textview4">TextView</string>
+    <string name="add_to_travel_plan">Add to travel plan</string>
+    <string name="textview">TextView</string>
+    <string name="create_account">Create Account</string>
+    <string name="links">
+        <a href = "http://stbsa.ro/eng/index.php"></a>
+
+    </string>
+    <string name="impresions">Impresions...</string>
+    <string name="add">ADD</string>
+    <string name="name2">Name</string>
+    <string name="name3">Name</string>
+    <string name="name4">Name</string>
+    <string name="enter_your_maximum_budget">Enter your MAXIMUM budget</string>
+    <string name="enter__your_minimum_budget">Enter your MINIMUM_budget</string>
+    <string name="enter_how_much_you__have_spent_today">Enter how much you have spent today</string>
+    <string name="share_your_toughts">Share your toughts...</string>
+    <string name="share_your_toughts2">Share your toughts</string>
+    <string name="share">Share</string>
+    <string name="day1">day1</string>
+    <string name="day2">DAY2</string>
+    <string name="day3">day3</string>
+
+</resources>
