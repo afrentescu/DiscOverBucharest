@@ -71,9 +71,7 @@ public class DayOneActivity extends AppCompatActivity {
                 if(attraction.getName().equals("CEC Palace")){
                     imgAtt.setImageResource(R.drawable.cecdoi);
                 }
-                if(attraction.getName().equals("Cismigiu Gardens")){
-                    imgAtt.setImageResource(R.drawable.cismigiudoi);
-                }
+
                 if(attraction.getName().equals("Stavropoleos Monastery")){
                     imgAtt.setImageResource(R.drawable.manastire);
                 }
