@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -48,8 +49,9 @@ import Classes.Attraction;
 
 public class HistoricalBuildingsActivity extends AppCompatActivity implements Serializable {
     private static final String APP_STATE_KEY = "APP_STATE_KEY";
-    TextView tvName, tvLocation, tvProgramme, tvDescription;
+    TextView tvName, tvLocation, tvProgramme, tvDescription, tvPret;
     ListView lvHist;
+    CheckBox cbAdult, cbStudent, cbPensionar;
 
     int[] IMAGES = {R.drawable.ateneu, R.drawable.palatulparlamentului, R.drawable.manastire, R.drawable.cecpalace, R.drawable.mogosoaia, R.drawable.muzeulartabuc};
 
@@ -89,7 +91,7 @@ public class HistoricalBuildingsActivity extends AppCompatActivity implements Se
 
       final   DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
         Query query = FirebaseDatabase.getInstance().getReference().child("attractions").child("historical_buildings");
-        FirebaseListOptions<Attraction> options = new FirebaseListOptions.Builder<Attraction>().setLayout(R.layout.attractionlayout).setQuery(query, Attraction.class).build();
+        FirebaseListOptions<Attraction> options = new FirebaseListOptions.Builder<Attraction>().setLayout(R.layout.attractionlayout2).setQuery(query, Attraction.class).build();
         adapter = new FirebaseListAdapter(options) {
             @Override
             protected void populateView(View v, Object model, final int position) {
@@ -98,9 +100,14 @@ public class HistoricalBuildingsActivity extends AppCompatActivity implements Se
                 tvLocation = v.findViewById(R.id.tvLocation);
                 tvDescription = v.findViewById(R.id.tvDescription);
                 tvProgramme = v.findViewById(R.id.tvProgramme);
+                tvPret = v.findViewById(R.id.textView10);
+                tvPret.setText("Pret:");
+
                 ImageView imgAtt = v.findViewById(R.id.imageViewattraction);
                 btnTravel = v.findViewById(R.id.buttontravelplan);
-
+                cbAdult = v.findViewById(R.id.checkBoxAdult);
+                cbStudent = v.findViewById(R.id.checkBoxStudent);
+                cbPensionar = v.findViewById(R.id.checkBoxPensionar);
 
                 final  Attraction attraction = (Attraction) model;
                 tvName.setText(attraction.getName());
@@ -109,6 +116,30 @@ public class HistoricalBuildingsActivity extends AppCompatActivity implements Se
                 tvProgramme.setText("Programme:\n" + attraction.getProgramme());
                 tvLocation.setText("Location:\n" + attraction.getLocation());
                 imgAtt.setImageResource(IMAGES[position]);
+
+
+                if( attraction.getPriceAdult() == 0 && attraction.getPriceStudent() == 0 && attraction.getPriceRetired() == 0 ) {
+                    cbAdult.setText("Free entrance!");
+                    cbPensionar.setVisibility(View.INVISIBLE);
+                    cbStudent.setVisibility(View.INVISIBLE);
+                }
+                else
+
+                if(attraction.getPriceAdult() == 0)
+                    cbAdult.setText("Adult: FREE");
+                else
+                cbAdult.setText("Adult: " + attraction.getPriceAdult().toString() + " ron");
+
+                if(attraction.getPriceStudent() == 0)
+                    cbStudent.setText("Student: FREE");
+                else
+                cbStudent.setText("Student: " + attraction.getPriceStudent().toString() + " ron");
+
+                if(attraction.getPriceRetired() == 0)
+                    cbPensionar.setText("Retired: FREE");
+                else
+                cbPensionar.setText("Retired: " +attraction.getPriceRetired().toString() + " ron");
+
 
                 ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
                     @Override
