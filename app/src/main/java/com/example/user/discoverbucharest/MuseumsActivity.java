@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RadioButton;
 import android.widget.RatingBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -39,14 +40,13 @@ public class MuseumsActivity extends AppCompatActivity {
     ListView lvMuseums;
     private FirebaseListAdapter<Attraction> adapter;
     ArrayList<String> list, locations, programs;
-
+    Long ticketPrices;
     int[] IMAGES = { R.drawable.sat, R.drawable.istorie, R.drawable.antipa,   R.drawable.muzeulartabuc ,R.drawable.simturi};
     String[] NAMES = {"Dimitrie Gusti National Village Museum",  "The National Museum of Romanian History","Grigore Antipa National Museum of Natural History","Museum of Art Collections", "Museum of Senses"};
     Button btnTravel;
     HashMap<String, Object> map;
-    Spinner spinnerAtt;
-    ArrayList <String> prices  = new ArrayList<>();
-   // ArrayAdapter<String>  spinnerAdapter ;//= new ArrayAdapter<String>(MuseumsActivity.this, android.R.layout.simple_spinner_dropdown_item, prices);
+
+    String maximmm;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -58,31 +58,19 @@ public class MuseumsActivity extends AppCompatActivity {
         programs = new ArrayList<>();
         map = new HashMap<>();
 
-
         FirebaseApp.initializeApp(this);
         final DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
 
-        //final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, arrayList);
-     //   arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
         Query query = FirebaseDatabase.getInstance().getReference().child("attractions").child("museums");
         FirebaseListOptions<Attraction> options = new FirebaseListOptions.Builder<Attraction>().setLayout(R.layout.attractionlayout2).setQuery(query, Attraction.class).build();
         adapter = new FirebaseListAdapter(options) {
-
-               /* ArrayList <String> prices = new ArrayList<>();
-                for (DataSnapshot ds : dataSnapshot.getChildren()){
-                    String ticketPrice = (String) ds.child("pret").getValue();
-
-                    prices.add(ticketPrice);
-                }
-
-            ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(MuseumsActivity.this, android.R.layout.simple_spinner_dropdown_item);
-*/
 
             @Override
             protected void populateView(View v, Object model, int position) {
                RatingBar ratingBar = v.findViewById(R.id.ratingBar3);
                 TextView tvName, tvLocation, tvProgramme, tvDescription, tvPret;
-              CheckBox cbAdult, cbStudent, cbPensionar;
+              final RadioButton rbAdult, rbStudent, rbPensionar;
                 tvName = v.findViewById(R.id.tvAttractionName);
                 tvLocation = v.findViewById(R.id.tvLocation);
                 tvDescription  =v.findViewById(R.id.tvDescription);
@@ -90,27 +78,31 @@ public class MuseumsActivity extends AppCompatActivity {
                 ImageView imgAtt = v.findViewById(R.id.imageViewattraction);
                 tvPret = v.findViewById(R.id.textView10);
                 btnTravel = v.findViewById(R.id.buttontravelplan);
-              cbAdult = v.findViewById(R.id.checkBoxAdult);
-              cbStudent = v.findViewById(R.id.checkBoxStudent);
-              cbPensionar = v.findViewById(R.id.checkBoxPensionar);
-                // model = getItem(position);
-              //  spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-             //   spinnerAtt.setAdapter(spinnerAdapter);
-           //     ArrayAdapter<Integer> spinnerAdapter = ArrayAdapter.createFromResource(this, R.array.)
+              rbAdult = v.findViewById(R.id.rbAdult);
+              rbStudent = v.findViewById(R.id.rbStudent);
+              rbPensionar = v.findViewById(R.id.rbPensionar);
+
                 tvPret.setText("Pret:");
                 final Attraction attraction = (Attraction)model;
-
-                //  tvName.setText("Name:" + attraction.getAttractionName());
                 tvName.setText( attraction.getName());
-
                 tvDescription.setText("Description:\n" + attraction.getDescription());
                 tvProgramme.setText("Programme:\n" + attraction.getProgramme());
                 tvLocation.setText("Location:\n" + attraction.getLocation());
                 imgAtt.setImageResource(IMAGES[position]);
-                cbAdult.setText("Adult: " + attraction.getPriceAdult().toString() + " ron");
-                cbStudent.setText("Student: " + attraction.getPriceStudent().toString() + " ron");
-                cbPensionar.setText("Retired: " +attraction.getPriceRetired().toString() + " ron");
+                rbAdult.setText("Adult: " + attraction.getPriceAdult().toString() + " ron");
+                rbStudent.setText("Student: " + attraction.getPriceStudent().toString() + " ron");
+                rbPensionar.setText("Retired: " +attraction.getPriceRetired().toString() + " ron");
 
+                if(rbAdult.isChecked()){
+                    rbStudent.setChecked(false);
+                    rbPensionar.setChecked(false);
+                }else if (rbStudent.isChecked()){
+                    rbAdult.setChecked(false);
+                    rbPensionar.setChecked(false);
+                }else if (rbPensionar.isChecked()){
+                    rbAdult.setChecked(false);
+                    rbStudent.setChecked(false);
+                }
                 ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
                     @Override
                     public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
@@ -127,17 +119,62 @@ public class MuseumsActivity extends AppCompatActivity {
                     }
                 });
 
+
                 btnTravel.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
 
-
-                        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+                        ticketPrices = Long.valueOf(0);
+                        final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
                         if (currentUser != null) {
-                            dbRef.child("users").child(currentUser.getUid()).child("attractionToSee").push().setValue(attraction);
-                            Toast.makeText(MuseumsActivity.this, "Added to your travel plan!", Toast.LENGTH_LONG).show();
+                            if (rbAdult.isChecked()) {
+                                ticketPrices = ticketPrices + attraction.getPriceAdult();
+                            }
+                            if (rbStudent.isChecked()) {
+                                ticketPrices = ticketPrices + attraction.getPriceStudent();
+                            }
+                            if (rbPensionar.isChecked()) {
+                                ticketPrices = ticketPrices + attraction.getPriceRetired();
+                            }/*
+                            if (rbAdult.isChecked() && rbStudent.isChecked()){
+                                ticketPrices = ticketPrices + attraction.getPriceAdult() + attraction.getPriceStudent();
+                            }
+                            if (rbAdult.isChecked() && rbPensionar.isChecked()){
+                                ticketPrices = ticketPrices + attraction.getPriceAdult() + attraction.getPriceRetired();
+                            }
+                            if (rbStudent.isChecked() && rbPensionar.isChecked()){
+                                ticketPrices = ticketPrices + attraction.getPriceStudent() + attraction.getPriceRetired();
+                            }
+                            if ( rbAdult.isChecked() && rbStudent.isChecked() && rbPensionar.isChecked()){
+                                ticketPrices = ticketPrices + attraction.getPriceAdult() + attraction.getPriceStudent() + attraction.getPriceRetired();
+                            }*/
+                            //TODO: adu aici buget si scade din el ticketPrice, apoi il trimiti inapoi in baza!!!!
 
-                        }else{
+                            dbRef.child("users").child(currentUser.getUid()).child("attractionToSee").push().setValue(attraction);
+
+                            dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
+                                    maximmm = dataSnapshot.child("users").child(currentUser.getUid()).child("maxBudget").getValue(String.class);
+
+                                  maximmm = String.valueOf(Float.parseFloat(maximmm) - ticketPrices);
+
+                                    Toast.makeText(MuseumsActivity.this, maximmm.toString(), Toast.LENGTH_LONG).show();
+                                    dbRef.child("users").child(currentUser.getUid()).child("maxBudget").setValue(maximmm);
+                                }
+
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                }
+                            });
+
+                            dbRef.child("users").child(currentUser.getUid()).child("dailyBudget").setValue(ticketPrices);
+                        }
+
+                    else{
                             Toast.makeText(MuseumsActivity.this, "You need an account in order to create a travel plan!", Toast.LENGTH_LONG).show();
 
                         }

@@ -45,18 +45,14 @@ import Classes.User;
 
 public class BugdetActivity extends AppCompatActivity implements Serializable {
     TextView tvCurrentBudget;
-   private  EditText etMaxB = null;
-    private  EditText etMinB = null;
-    private  EditText etDailyB = null;
     User user ;
     Button btnUpdate;
     float curentBudget;
     float newCurrentB ;
     NotificationCompat.Builder notification;
-
+    String ticketPrices;
     EditText etMAXIM, etMINIM, etDAILY;
-
-
+    FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate( Bundle savedInstanceState) {
@@ -66,6 +62,8 @@ public class BugdetActivity extends AppCompatActivity implements Serializable {
 }
         setContentView(R.layout.activity_budget);
         user = new User();
+
+         ticketPrices = getIntent().getStringExtra(Intent.EXTRA_TEXT);
 
        FirebaseApp.initializeApp(this);
        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -78,6 +76,7 @@ public class BugdetActivity extends AppCompatActivity implements Serializable {
        tvCurrentBudget = findViewById(R.id.textView3);
 
         btnUpdate = findViewById(R.id.btnUpdate);
+       Toast.makeText(BugdetActivity.this, ticketPrices, Toast.LENGTH_LONG).show();
 
         notification = new NotificationCompat.Builder(this);
 
@@ -128,16 +127,24 @@ public class BugdetActivity extends AppCompatActivity implements Serializable {
                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                    //   user.setMinBudget(dataSnapshot.child("users").child(currentUser.getUid()).child("minBudget").getValue(String.class));
                    //  etMINIM.setText(user.getMinBudget());
-                   final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+                    DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("users");
+                    FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
                    String maximmm = dataSnapshot.child("users").child(currentUser.getUid()).child("maxBudget").getValue(String.class);
                     String minimmmm = dataSnapshot.child("users").child(currentUser.getUid()).child("minBudget").getValue(String.class);
-                    Float current = dataSnapshot.child("users").child(currentUser.getUid()).child("currentBudget").getValue(Float.class);
-                   if (currentUser != null && maximmm != null && minimmmm != null && current != null) {
+
+                   Float dailyBudget = dataSnapshot.child("users").child(currentUser.getUid()).child("dailyBudget").getValue(Float.class);
+                   Float current = dataSnapshot.child("users").child(currentUser.getUid()).child("currentBudget").getValue(Float.class);
+                //   if (currentUser != null && maximmm != null && minimmmm != null && current != null) {
                        etMAXIM.setText(dataSnapshot.child("users").child(currentUser.getUid()).child("maxBudget").getValue(String.class));
-                       etMINIM.setText(dataSnapshot.child("users").child(currentUser.getUid()).child("minBudget").getValue(String.class));
-                       tvCurrentBudget.setText(dataSnapshot.child("users").child(currentUser.getUid()).child("currentBudget").getValue(Float.class).toString() + "  RON");
+                //   tvCurrentBudget.setText(dailyBudget + "RON");
+
+                   etMINIM.setText(dataSnapshot.child("users").child(currentUser.getUid()).child("minBudget").getValue(String.class));
+                    //   tvCurrentBudget.setText(dataSnapshot.child("users").child(currentUser.getUid()).child("currentBudget").getValue(Float.class).toString() + "  RON");
                        // tvCurrentBudget.setText(String.valueOf(newBB));
-                   }
+                  // }
+
+
+
                }
 
                @Override
@@ -191,27 +198,34 @@ public class BugdetActivity extends AppCompatActivity implements Serializable {
            @RequiresApi(api = Build.VERSION_CODES.O)
            @Override
            public void onDataChange(@NonNull DataSnapshot dbSnap) {
-               final FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
-               final DatabaseReference dbRef;
+                FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
+                DatabaseReference dbRef;
                dbRef = FirebaseDatabase.getInstance().getReference("users");
-               final String maxbudget = etMAXIM.getText().toString();
-               final String minbudget = etMINIM.getText().toString();
-               final String dailyBudget = etDAILY.getText().toString();
-              //  curentBudget  = Float.parseFloat(maxbudget);
+                Float maxbudget = dbSnap.child("users").child(currentUser.getUid()).child("maxBudget").getValue(Float.class);
+                String minbudget = etMINIM.getText().toString();
+               // String dailyBudget = etDAILY.getText().toString();
 
-              curentBudget = computeCurrentBalance();
+          //  String dailyBudget = getIntent().getStringExtra("ticketPrices");
+             Float dailyBudget = dbSnap.child("users").child(currentUser.getUid()).child("dailyBudget").getValue(Float.class);
+              //  curentBudget  = Float.parseFloat(maxbudget);
+               //  curentBudget = Long.valueOf(maxbudget) -  Long.valueOf(ticketPrices);
+             curentBudget = computeCurrentBalance();
               if(curentBudget <= Float.parseFloat(minbudget ))
                   sendNotification();
+            //  if(Float.parseFloat(maxbudget) != 0) {
+                  maxbudget = maxbudget - dailyBudget;
 
-               tvCurrentBudget.setText(curentBudget + "RON");
-
-
+                  tvCurrentBudget.setText(dailyBudget + "RON");
+              // - aici imi trebuie alt textbox etMAXIM.setText(maxbudget);
+             // }
                    if (fbUser != null) {
 
                        dbRef.child(fbUser.getUid()).child("maxBudget").setValue(maxbudget);
                        dbRef.child(fbUser.getUid()).child("minBudget").setValue(minbudget);
                        dbRef.child(fbUser.getUid()).child("dailyBudget").setValue(dailyBudget);
+
                    }
+            //   etMAXIM.setText(dbSnap.child("users").child(currentUser.getUid()).child("maxBudget").getValue(String.class));
 
                }
 
@@ -228,7 +242,7 @@ public class BugdetActivity extends AppCompatActivity implements Serializable {
 
         //TODO: compute current budget by substractiong from the current amount the daily amount spent
         //TODO: make data persist in the view
-        final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         final DatabaseReference dbRef;
         dbRef = FirebaseDatabase.getInstance().getReference("users");
 
@@ -239,23 +253,23 @@ public class BugdetActivity extends AppCompatActivity implements Serializable {
                 Map<String, String> data = (Map<String, String>) dataSnapshot.getValue();
 
                 String currentB;
-                final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-                String maximmm = dataSnapshot.child("users").child(currentUser.getUid()).child("maxBudget").getValue(String.class);
-                String minimmmm = dataSnapshot.child("users").child(currentUser.getUid()).child("minBudget").getValue(String.class);
-                Float current = dataSnapshot.child("users").child(currentUser.getUid()).child("currentBudget").getValue(Float.class);
-                if (currentUser != null && maximmm != null && minimmmm != null && current != null) {
-                    String maximB = String.valueOf(data.get("maxBudget"));
+                 FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+                Float maximmm = dataSnapshot.child("users").child(currentUser.getUid()).child("maxBudget").getValue(Float.class);
+                Float minimmmm = dataSnapshot.child("users").child(currentUser.getUid()).child("minBudget").getValue(Float.class);
+                Float current = dataSnapshot.child("users").child(currentUser.getUid()).child("dailyBudget").getValue(Float.class);
+                if (currentUser != null && maximmm != null && minimmmm != null ) {
+                   // String maximB = String.valueOf(data.get("maxBudget"));
                     String minimB = String.valueOf(data.get("minBudget"));
                     String dailyBB = String.valueOf(data.get("dailyBudget"));
 
-                    currentB = maximB;
-                    if (Float.parseFloat(currentB) >= Float.parseFloat(minimB)) {
-
-                        newCurrentB = Float.parseFloat(currentB) - Float.parseFloat(dailyBB);
+                    //currentB = maximB;
+                    if (maximmm >= minimmmm) {
+                        maximmm = maximmm - current;
+                        newCurrentB = maximmm ;
                     } else {
                         sendNotification();
                     }
-                    dbRef.child(currentUser.getUid()).child("currentBudget").setValue(newCurrentB);
+                    dbRef.child(currentUser.getUid()).child("maxBudget").setValue(newCurrentB);
                 }
             }
             @Override

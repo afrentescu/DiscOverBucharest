@@ -19,6 +19,7 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RadioButton;
 import android.widget.RatingBar;
 import android.widget.SearchView;
 import android.widget.Switch;
@@ -51,7 +52,7 @@ public class HistoricalBuildingsActivity extends AppCompatActivity implements Se
     private static final String APP_STATE_KEY = "APP_STATE_KEY";
     TextView tvName, tvLocation, tvProgramme, tvDescription, tvPret;
     ListView lvHist;
-    CheckBox cbAdult, cbStudent, cbPensionar;
+    RadioButton rbAdult, rbStudent, rbPensionar;
 
     int[] IMAGES = {R.drawable.ateneu, R.drawable.palatulparlamentului, R.drawable.manastire, R.drawable.cecpalace, R.drawable.mogosoaia, R.drawable.muzeulartabuc};
 
@@ -105,9 +106,9 @@ public class HistoricalBuildingsActivity extends AppCompatActivity implements Se
 
                 ImageView imgAtt = v.findViewById(R.id.imageViewattraction);
                 btnTravel = v.findViewById(R.id.buttontravelplan);
-                cbAdult = v.findViewById(R.id.checkBoxAdult);
-                cbStudent = v.findViewById(R.id.checkBoxStudent);
-                cbPensionar = v.findViewById(R.id.checkBoxPensionar);
+                rbAdult = v.findViewById(R.id.rbAdult);
+                rbStudent = v.findViewById(R.id.rbStudent);
+                rbPensionar = v.findViewById(R.id.rbPensionar);
 
                 final  Attraction attraction = (Attraction) model;
                 tvName.setText(attraction.getName());
@@ -119,26 +120,26 @@ public class HistoricalBuildingsActivity extends AppCompatActivity implements Se
 
 
                 if( attraction.getPriceAdult() == 0 && attraction.getPriceStudent() == 0 && attraction.getPriceRetired() == 0 ) {
-                    cbAdult.setText("Free entrance!");
-                    cbPensionar.setVisibility(View.INVISIBLE);
-                    cbStudent.setVisibility(View.INVISIBLE);
+                    rbAdult.setText("Free entrance!");
+                    rbPensionar.setVisibility(View.INVISIBLE);
+                    rbStudent.setVisibility(View.INVISIBLE);
                 }
                 else
 
                 if(attraction.getPriceAdult() == 0)
-                    cbAdult.setText("Adult: FREE");
+                    rbAdult.setText("Adult: FREE");
                 else
-                cbAdult.setText("Adult: " + attraction.getPriceAdult().toString() + " ron");
+                rbAdult.setText("Adult: " + attraction.getPriceAdult().toString() + " ron");
 
                 if(attraction.getPriceStudent() == 0)
-                    cbStudent.setText("Student: FREE");
+                    rbStudent.setText("Student: FREE");
                 else
-                cbStudent.setText("Student: " + attraction.getPriceStudent().toString() + " ron");
+                rbStudent.setText("Student: " + attraction.getPriceStudent().toString() + " ron");
 
                 if(attraction.getPriceRetired() == 0)
-                    cbPensionar.setText("Retired: FREE");
+                    rbPensionar.setText("Retired: FREE");
                 else
-                cbPensionar.setText("Retired: " +attraction.getPriceRetired().toString() + " ron");
+                rbPensionar.setText("Retired: " +attraction.getPriceRetired().toString() + " ron");
 
 
                 ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
