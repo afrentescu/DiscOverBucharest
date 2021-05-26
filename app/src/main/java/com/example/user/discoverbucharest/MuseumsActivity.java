@@ -1,9 +1,17 @@
 package com.example.user.discoverbucharest;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -45,7 +53,7 @@ public class MuseumsActivity extends AppCompatActivity {
     String[] NAMES = {"Dimitrie Gusti National Village Museum",  "The National Museum of Romanian History","Grigore Antipa National Museum of Natural History","Museum of Art Collections", "Museum of Senses"};
     Button btnTravel;
     HashMap<String, Object> map;
-
+    NotificationCompat.Builder notification;
     String maximmm;
 
     @Override
@@ -57,7 +65,7 @@ public class MuseumsActivity extends AppCompatActivity {
         locations = new ArrayList<>();
         programs = new ArrayList<>();
         map = new HashMap<>();
-
+        notification = new NotificationCompat.Builder(this);
         FirebaseApp.initializeApp(this);
         final DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
 
@@ -153,15 +161,20 @@ public class MuseumsActivity extends AppCompatActivity {
                             dbRef.child("users").child(currentUser.getUid()).child("attractionToSee").push().setValue(attraction);
 
                             dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @RequiresApi(api = Build.VERSION_CODES.O)
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                     FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
                                     maximmm = dataSnapshot.child("users").child(currentUser.getUid()).child("maxBudget").getValue(String.class);
 
-                                  maximmm = String.valueOf(Float.parseFloat(maximmm) - ticketPrices);
+                                  maximmm = String.valueOf(Integer.parseInt(maximmm) - ticketPrices);
 
-                                    Toast.makeText(MuseumsActivity.this, maximmm.toString(), Toast.LENGTH_LONG).show();
+                                    Toast.makeText(MuseumsActivity.this, "Added to your travel plan!", Toast.LENGTH_LONG).show();
                                     dbRef.child("users").child(currentUser.getUid()).child("maxBudget").setValue(maximmm);
+                                    if(maximmm.length() < 3){
+                                        sendNotification();
+
+                                    }
                                 }
 
 
@@ -199,6 +212,40 @@ public class MuseumsActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         adapter.stopListening();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void sendNotification(){
+
+
+
+        NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            String chanel_id = "3000";
+            CharSequence name = "Channel Name";
+            String description = "Chanel Description";
+            int importance = NotificationManager.IMPORTANCE_LOW;
+            NotificationChannel mChannel = new NotificationChannel(chanel_id, name, importance);
+            mChannel.setDescription(description);
+            mChannel.enableLights(true);
+            mChannel.setLightColor(Color.BLUE);
+            nm.createNotificationChannel(mChannel);
+            notification = new NotificationCompat.Builder(this, chanel_id);
+        } else {
+            notification = new NotificationCompat.Builder(this);
+        }
+        notification.setSmallIcon(R.drawable.used);
+        notification.setTicker("You have reached the MININUN budget for your trip!");
+        notification.setWhen(System.currentTimeMillis());
+        notification.setContentTitle("Trip budget");
+        notification.setContentText("Minimum budget reached");
+
+        Intent intent = new Intent(getApplicationContext(), BugdetActivity.class);
+        PendingIntent pdi = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        notification.setContentIntent(pdi);
+        int notid  =1;
+        nm.notify(notid, notification.build());
     }
 
 }

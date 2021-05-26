@@ -21,6 +21,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,6 +39,7 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.util.Map;
 
 import Classes.Attraction;
@@ -49,38 +51,74 @@ public class BugdetActivity extends AppCompatActivity implements Serializable {
     Button btnUpdate;
     float curentBudget;
     float newCurrentB ;
+    String  maximmm;
     NotificationCompat.Builder notification;
     String ticketPrices;
     EditText etMAXIM, etMINIM, etDAILY;
+   TextView tvMessage, tvBudget;
     FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate( Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+       setContentView(R.layout.activity_budget);
+       etMAXIM = findViewById(R.id.etMAXb);
+       btnUpdate = findViewById(R.id.btnUpdate);
+        tvMessage = findViewById(R.id.textView2);
+        tvBudget = findViewById(R.id.tvBudget);
+       // tvMessage.setText("We want to help you manage your budget during this trip1! /n If you are entering the application for the first time, enter the ammount you planned on spending while visiting touristical attractions. /n" +
+             //   "When you choose to visit a specific place and add it to your travel plan, we will substract the cost of the ticket from the total amount for you, if there is any! " +
+               // "Enjoy! :D");
+
       if(savedInstanceState != null){
 
 }
-        setContentView(R.layout.activity_budget);
+
         user = new User();
 
-         ticketPrices = getIntent().getStringExtra(Intent.EXTRA_TEXT);
 
        FirebaseApp.initializeApp(this);
-       FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+     final  FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
        final DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
-       etMAXIM = findViewById(R.id.etMAXb);
-       etMINIM = findViewById(R.id.etMINb);
-       etDAILY = findViewById(R.id.etDAILYb);
+      // etMINIM = findViewById(R.id.etMINb);
+    //   etDAILY = findViewById(R.id.etDAILYb);
 
-       tvCurrentBudget = findViewById(R.id.textView3);
+    //   tvCurrentBudget = findViewById(R.id.textView3);
 
-        btnUpdate = findViewById(R.id.btnUpdate);
-       Toast.makeText(BugdetActivity.this, ticketPrices, Toast.LENGTH_LONG).show();
+       dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                maximmm = dataSnapshot.child("users").child(currentUser.getUid()).child("maxBudget").getValue(String.class);
+                if(maximmm == null){
+                    tvBudget.setText(" ");
+                    tvMessage.setText("We want to help you manage your budget during this trip! Please " +
+                            "enter the amount you planned on spending while visiting touristical attractions. We will notify you when there are only 100Ron left!" );
+                }else{
+                    if(maximmm.length() < 3){
+                        sendNotification();
 
-        notification = new NotificationCompat.Builder(this);
+                    }
+                    tvBudget.setText(maximmm + " Ron");
+                    tvMessage.setText("When you choose to visit a specific place and add it to your travel plan, we will substract the cost of the ticket from the total amount for you, if there is any! Enjoy! :D");
+                    btnUpdate.setVisibility(View.INVISIBLE);
+                    etMAXIM.setVisibility(View.INVISIBLE);
 
-   /*    btnUpdate.setOnClickListener(new View.OnClickListener() {
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+
+
+       notification = new NotificationCompat.Builder(this);
+
+
+     btnUpdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
@@ -89,32 +127,20 @@ public class BugdetActivity extends AppCompatActivity implements Serializable {
                     Intent intent = new Intent (getApplicationContext(), LogInActivity.class);
                     startActivity(intent);
                 }else{
-                    etMinB.setText(dbRef.child(currentUser.getUid()).child("minBudget").toString());
-                    etMaxB.setText(dbRef.child(currentUser.getUid()).child("maxBudget").toString());
+                    String maxbudget = String.valueOf(etMAXIM.getText());
+                    dbRef.child("users").child(currentUser.getUid()).child("maxBudget").setValue(maxbudget);
+                    Toast.makeText(BugdetActivity.this, "Budget set succesfully!", Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent (getApplicationContext(), MainActivity.class);
+                    startActivity(intent);
+
+                  //  tvBudget.setText(dbRef.child(currentUser.getUid()).child("maxBudget").toString());
 
                 }
 
         }
-        });*/
-       btnUpdate = findViewById(R.id.btnUpdate);
-       btnUpdate.setOnClickListener(new View.OnClickListener() {
-           @Override
-           public void onClick(View v) {
+        });
 
-               FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-               if (currentUser == null) {
-                   Intent intent = new Intent (getApplicationContext(), LogInActivity.class);
-                   startActivity(intent);
-               } else {
-
-                   updateUser();
-
-               }
-
-
-           }
-       });
-
+/*
 
        if(currentUser != null){
            //  String savedMaxBudget = savedInstanceState.getString("maximBudget");
@@ -156,7 +182,7 @@ public class BugdetActivity extends AppCompatActivity implements Serializable {
 
 
        }
-
+*/
 
    }
 
@@ -201,28 +227,28 @@ public class BugdetActivity extends AppCompatActivity implements Serializable {
                 FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
                 DatabaseReference dbRef;
                dbRef = FirebaseDatabase.getInstance().getReference("users");
-                Float maxbudget = dbSnap.child("users").child(currentUser.getUid()).child("maxBudget").getValue(Float.class);
+                String maxbudget = String.valueOf(etMAXIM.getText());
                 String minbudget = etMINIM.getText().toString();
                // String dailyBudget = etDAILY.getText().toString();
 
           //  String dailyBudget = getIntent().getStringExtra("ticketPrices");
-             Float dailyBudget = dbSnap.child("users").child(currentUser.getUid()).child("dailyBudget").getValue(Float.class);
+        //     Float dailyBudget = dbSnap.child("users").child(currentUser.getUid()).child("dailyBudget").getValue(Float.class);
               //  curentBudget  = Float.parseFloat(maxbudget);
                //  curentBudget = Long.valueOf(maxbudget) -  Long.valueOf(ticketPrices);
-             curentBudget = computeCurrentBalance();
-              if(curentBudget <= Float.parseFloat(minbudget ))
-                  sendNotification();
+//             curentBudget = computeCurrentBalance();
+//              if(curentBudget <= Float.parseFloat(minbudget ))
+//                  sendNotification();
             //  if(Float.parseFloat(maxbudget) != 0) {
-                  maxbudget = maxbudget - dailyBudget;
+              //    maxbudget = maxbudget - dailyBudget;
 
-                  tvCurrentBudget.setText(dailyBudget + "RON");
+             //     tvCurrentBudget.setText(dailyBudget + "RON");
               // - aici imi trebuie alt textbox etMAXIM.setText(maxbudget);
              // }
+
+
                    if (fbUser != null) {
 
                        dbRef.child(fbUser.getUid()).child("maxBudget").setValue(maxbudget);
-                       dbRef.child(fbUser.getUid()).child("minBudget").setValue(minbudget);
-                       dbRef.child(fbUser.getUid()).child("dailyBudget").setValue(dailyBudget);
 
                    }
             //   etMAXIM.setText(dbSnap.child("users").child(currentUser.getUid()).child("maxBudget").getValue(String.class));
@@ -284,7 +310,7 @@ public class BugdetActivity extends AppCompatActivity implements Serializable {
 
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    private void sendNotification(){
+    public void sendNotification(){
 
 
 
