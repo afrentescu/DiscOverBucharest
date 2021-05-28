@@ -1,10 +1,18 @@
 package com.example.user.discoverbucharest;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -63,7 +71,9 @@ public class HistoricalBuildingsActivity extends AppCompatActivity implements Se
     RatingBar ratingBar;
     ArrayList<Attraction> attractionList;
     float total;
-
+    Long ticketPrices;
+    NotificationCompat.Builder notification;
+    String maximmm;
     Button btnTravel;
     String state;
     HashMap<String, Object> map, mapLocation, mapProgram;
@@ -117,6 +127,9 @@ public class HistoricalBuildingsActivity extends AppCompatActivity implements Se
                 tvProgramme.setText("Programme:\n" + attraction.getProgramme());
                 tvLocation.setText("Location:\n" + attraction.getLocation());
                 imgAtt.setImageResource(IMAGES[position]);
+                rbAdult.setText("Adult: " + attraction.getPriceAdult().toString() + " ron");
+                rbStudent.setText("Student: " + attraction.getPriceStudent().toString() + " ron");
+                rbPensionar.setText("Retired: " +attraction.getPriceRetired().toString() + " ron");
 
 
                 if( attraction.getPriceAdult() == 0 && attraction.getPriceStudent() == 0 && attraction.getPriceRetired() == 0 ) {
@@ -140,7 +153,16 @@ public class HistoricalBuildingsActivity extends AppCompatActivity implements Se
                     rbPensionar.setText("Retired: FREE");
                 else
                 rbPensionar.setText("Retired: " +attraction.getPriceRetired().toString() + " ron");
-
+                if(rbAdult.isChecked()){
+                    rbStudent.setChecked(false);
+                    rbPensionar.setChecked(false);
+                }else if (rbStudent.isChecked()){
+                    rbAdult.setChecked(false);
+                    rbPensionar.setChecked(false);
+                }else if (rbPensionar.isChecked()){
+                    rbAdult.setChecked(false);
+                    rbStudent.setChecked(false);
+                }
 
                 ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
                     @Override
@@ -162,13 +184,48 @@ public class HistoricalBuildingsActivity extends AppCompatActivity implements Se
 
                 attractionList.add(attraction); //!!!!!!!!!!!!
 
+                 ticketPrices = Long.valueOf(0);
+                 final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
-
-                 FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
                  if (currentUser != null) {
+                     if (rbAdult.isChecked()) {
+                         ticketPrices = ticketPrices + attraction.getPriceAdult();
+                     }
+                     if (rbStudent.isChecked()) {
+                         ticketPrices = ticketPrices + attraction.getPriceStudent();
+                     }
+                     if (rbPensionar.isChecked()) {
+                         ticketPrices = ticketPrices + attraction.getPriceRetired();
+                     }
                      Toast.makeText(HistoricalBuildingsActivity.this, "Added to your travel plan!", Toast.LENGTH_LONG).show();
 
                      dbRef.child("users").child(currentUser.getUid()).child("attractionToSee").push().setValue(attraction); //updateChildren(map);
+
+                     dbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                         @RequiresApi(api = Build.VERSION_CODES.O)
+                         @Override
+                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                             FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
+                             maximmm = dataSnapshot.child("users").child(currentUser.getUid()).child("maxBudget").getValue(String.class);
+
+                             maximmm = String.valueOf(Integer.parseInt(maximmm) - ticketPrices);
+
+                             Toast.makeText(HistoricalBuildingsActivity.this, "Added to your travel plan!", Toast.LENGTH_LONG).show();
+                             dbRef.child("users").child(currentUser.getUid()).child("maxBudget").setValue(maximmm);
+                             if(maximmm.length() < 3){
+                                 sendNotification();
+
+                             }
+                         }
+
+
+                         @Override
+                         public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                         }
+                     });
+
+                     dbRef.child("users").child(currentUser.getUid()).child("dailyBudget").setValue(ticketPrices);
 
                  }else{
                      Toast.makeText(HistoricalBuildingsActivity.this, "You need an account in order to create a travel plan!", Toast.LENGTH_LONG).show();
@@ -232,6 +289,38 @@ public class HistoricalBuildingsActivity extends AppCompatActivity implements Se
         // return the new list
         return newList;
     }
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void sendNotification(){
 
+
+
+        NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            String chanel_id = "3000";
+            CharSequence name = "Channel Name";
+            String description = "Chanel Description";
+            int importance = NotificationManager.IMPORTANCE_LOW;
+            NotificationChannel mChannel = new NotificationChannel(chanel_id, name, importance);
+            mChannel.setDescription(description);
+            mChannel.enableLights(true);
+            mChannel.setLightColor(Color.BLUE);
+            nm.createNotificationChannel(mChannel);
+            notification = new NotificationCompat.Builder(this, chanel_id);
+        } else {
+            notification = new NotificationCompat.Builder(this);
+        }
+        notification.setSmallIcon(R.drawable.used);
+        notification.setTicker("You have reached the MININUN budget for your trip!");
+        notification.setWhen(System.currentTimeMillis());
+        notification.setContentTitle("Trip budget");
+        notification.setContentText("Minimum budget reached");
+
+        Intent intent = new Intent(getApplicationContext(), BugdetActivity.class);
+        PendingIntent pdi = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        notification.setContentIntent(pdi);
+        int notid  =1;
+        nm.notify(notid, notification.build());
+    }
 }
 
