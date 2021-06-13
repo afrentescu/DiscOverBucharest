@@ -26,6 +26,10 @@
     <item android:id="@+id/trasportation"
         android:title="Transportation"
         app:showAsAction="never"></item>
+
+    <item android:id="@+id/maps"
+        android:title="Maps"
+        app:showAsAction="never"></item>
     <item android:id="@+id/logout"
         android:title="LogOut"
         app:showAsAction="never"></item>

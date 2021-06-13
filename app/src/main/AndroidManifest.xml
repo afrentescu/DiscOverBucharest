@@ -37,7 +37,7 @@
         <activity android:name=".DayOneActivity"></activity>
         <activity android:name=".DayTreeActivity"></activity>
         <activity android:name=".DayTwoActivity"></activity>
-
+        <activity android:name=".MapsActivity"></activity>
     </application>
 
 </manifest>

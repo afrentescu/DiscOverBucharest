@@ -155,6 +155,10 @@ public class MainActivity extends AppCompatActivity {
                 this.startActivity(intent7);
                 return true;
 
+            case R.id.maps:
+                Intent intent8 = new Intent(getApplicationContext(), MapsActivity.class);
+                this.startActivity(intent8);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
 

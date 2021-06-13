@@ -40,13 +40,13 @@ public class TransportationActivity extends AppCompatActivity {
 
     {
         try {
-            url2 = new URL("http://stbsa.ro/eng/portofel_electronic_eng.php");
+            url2 = new URL("http://stbsa.ro/eng/index");
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
     }
   URL[] urls  = { url, url2};
-    String[] NAMES = {"http://stbsa.ro/eng/index.php","http://www.metrorex.ro/first_page_p1352-2" , "http://stbsa.ro/eng/portofel_electronic_eng.php", " "};
+    String[] NAMES = {"http://stbsa.ro/eng/index","http://www.metrorex.ro/first_page_p1352-2" , "http://stbsa.ro/eng/travel_tips_eng", " "};
     int[] IMAGES = { R.drawable.stb, R.drawable.hartamet,R.drawable.ticketts, R.drawable.uber};
     // <a href ="http://www.metrorex.ro/first_page_p1352-2"></a>
     //        <a href = "http://stbsa.ro/eng/portofel_electronic_eng.php"></a>
