@@ -3,9 +3,11 @@ package com.example.user.discoverbucharest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -49,9 +51,9 @@ public class MuseumsActivity extends AppCompatActivity {
     private FirebaseListAdapter<Attraction> adapter;
     ArrayList<String> list, locations, programs;
     Long ticketPrices;
-    int[] IMAGES = { R.drawable.sat, R.drawable.istorie, R.drawable.antipa,   R.drawable.muzeulartabuc ,R.drawable.simturi};
-    String[] NAMES = {"Dimitrie Gusti National Village Museum",  "The National Museum of Romanian History","Grigore Antipa National Museum of Natural History","Museum of Art Collections", "Museum of Senses"};
-    Button btnTravel;
+    int[] IMAGES = {R.drawable.sat, R.drawable.istorie, R.drawable.antipa, R.drawable.muzeulartabuc, R.drawable.simturi};
+    String[] NAMES = {"Dimitrie Gusti National Village Museum", "The National Museum of Romanian History", "Grigore Antipa National Museum of Natural History", "Museum of Art Collections", "Museum of Senses"};
+    Button btnTravel, btnMaps;
     HashMap<String, Object> map;
     NotificationCompat.Builder notification;
     String maximmm;
@@ -60,8 +62,8 @@ public class MuseumsActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layoutmuseums);
-        lvMuseums =findViewById(R.id.lvMuseums);
-        list  = new ArrayList<>();
+        lvMuseums = findViewById(R.id.lvMuseums);
+        list = new ArrayList<>();
         locations = new ArrayList<>();
         programs = new ArrayList<>();
         map = new HashMap<>();
@@ -76,38 +78,39 @@ public class MuseumsActivity extends AppCompatActivity {
 
             @Override
             protected void populateView(View v, Object model, int position) {
-               RatingBar ratingBar = v.findViewById(R.id.ratingBar3);
+                RatingBar ratingBar = v.findViewById(R.id.ratingBar3);
                 TextView tvName, tvLocation, tvProgramme, tvDescription, tvPret;
-              final RadioButton rbAdult, rbStudent, rbPensionar;
+                final RadioButton rbAdult, rbStudent, rbPensionar;
                 tvName = v.findViewById(R.id.tvAttractionName);
                 tvLocation = v.findViewById(R.id.tvLocation);
-                tvDescription  =v.findViewById(R.id.tvDescription);
+                tvDescription = v.findViewById(R.id.tvDescription);
                 tvProgramme = v.findViewById(R.id.tvProgramme);
                 ImageView imgAtt = v.findViewById(R.id.imageViewattraction);
                 tvPret = v.findViewById(R.id.textView10);
                 btnTravel = v.findViewById(R.id.buttontravelplan);
-              rbAdult = v.findViewById(R.id.rbAdult);
-              rbStudent = v.findViewById(R.id.rbStudent);
-              rbPensionar = v.findViewById(R.id.rbPensionar);
+                rbAdult = v.findViewById(R.id.rbAdult);
+                rbStudent = v.findViewById(R.id.rbStudent);
+                rbPensionar = v.findViewById(R.id.rbPensionar);
+                btnMaps = v.findViewById(R.id.btnMaps2);
 
                 tvPret.setText("Pret:");
-                final Attraction attraction = (Attraction)model;
-                tvName.setText( attraction.getName());
+                final Attraction attraction = (Attraction) model;
+                tvName.setText(attraction.getName());
                 tvDescription.setText("Description:\n" + attraction.getDescription());
                 tvProgramme.setText("Programme:\n" + attraction.getProgramme());
                 tvLocation.setText("Location:\n" + attraction.getLocation());
                 imgAtt.setImageResource(IMAGES[position]);
                 rbAdult.setText("Adult: " + attraction.getPriceAdult().toString() + " ron");
                 rbStudent.setText("Student: " + attraction.getPriceStudent().toString() + " ron");
-                rbPensionar.setText("Retired: " +attraction.getPriceRetired().toString() + " ron");
+                rbPensionar.setText("Retired: " + attraction.getPriceRetired().toString() + " ron");
 
-                if(rbAdult.isChecked()){
+                if (rbAdult.isChecked()) {
                     rbStudent.setChecked(false);
                     rbPensionar.setChecked(false);
-                }else if (rbStudent.isChecked()){
+                } else if (rbStudent.isChecked()) {
                     rbAdult.setChecked(false);
                     rbPensionar.setChecked(false);
-                }else if (rbPensionar.isChecked()){
+                } else if (rbPensionar.isChecked()) {
                     rbAdult.setChecked(false);
                     rbStudent.setChecked(false);
                 }
@@ -118,7 +121,7 @@ public class MuseumsActivity extends AppCompatActivity {
                         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
                         if (currentUser != null) {
                             Toast.makeText(getApplicationContext(), "Thank you for your rate!", Toast.LENGTH_LONG).show();
-                        }else{
+                        } else {
                             Toast.makeText(MuseumsActivity.this, "You need an account in order to give a rate!", Toast.LENGTH_LONG).show();
 
                         }
@@ -126,7 +129,15 @@ public class MuseumsActivity extends AppCompatActivity {
 
                     }
                 });
+                btnMaps.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        String source = attraction.getName();
 
+                        DisplayTrack(source);
+
+                    }
+                });
 
                 btnTravel.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -167,11 +178,11 @@ public class MuseumsActivity extends AppCompatActivity {
                                     FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
                                     maximmm = dataSnapshot.child("users").child(currentUser.getUid()).child("maxBudget").getValue(String.class);
 
-                                  maximmm = String.valueOf(Integer.parseInt(maximmm) - ticketPrices);
+                                    maximmm = String.valueOf(Integer.parseInt(maximmm) - ticketPrices);
 
                                     Toast.makeText(MuseumsActivity.this, "Added to your travel plan!", Toast.LENGTH_LONG).show();
                                     dbRef.child("users").child(currentUser.getUid()).child("maxBudget").setValue(maximmm);
-                                    if(maximmm.length() < 3){
+                                    if (maximmm.length() < 3) {
                                         sendNotification();
 
                                     }
@@ -185,9 +196,7 @@ public class MuseumsActivity extends AppCompatActivity {
                             });
 
                             dbRef.child("users").child(currentUser.getUid()).child("dailyBudget").setValue(ticketPrices);
-                        }
-
-                    else{
+                        } else {
                             Toast.makeText(MuseumsActivity.this, "You need an account in order to create a travel plan!", Toast.LENGTH_LONG).show();
 
                         }
@@ -202,6 +211,7 @@ public class MuseumsActivity extends AppCompatActivity {
 
     }
 
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -215,8 +225,7 @@ public class MuseumsActivity extends AppCompatActivity {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public void sendNotification(){
-
+    public void sendNotification() {
 
 
         NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -244,9 +253,24 @@ public class MuseumsActivity extends AppCompatActivity {
         PendingIntent pdi = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         notification.setContentIntent(pdi);
-        int notid  =1;
+        int notid = 1;
         nm.notify(notid, notification.build());
     }
 
+    private void DisplayTrack(String source) {
+        try {
+            Uri uri = Uri.parse("https://www.google.co.in/maps/search/" + source);
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            intent.setPackage("com.google.android.apps.maps");
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            Uri uri = Uri.parse("https://play.google.com/store/apps/details?id=com.google.apps.maps");
+
+            Intent intent2 = new Intent(Intent.ACTION_VIEW, uri);
+            intent2.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent2);
+        }
+    }
 }
 

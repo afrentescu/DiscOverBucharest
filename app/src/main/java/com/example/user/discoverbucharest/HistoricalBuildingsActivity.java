@@ -3,10 +3,12 @@ package com.example.user.discoverbucharest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -74,10 +76,9 @@ public class HistoricalBuildingsActivity extends AppCompatActivity implements Se
     Long ticketPrices;
     NotificationCompat.Builder notification;
     String maximmm;
-    Button btnTravel;
+    Button btnTravel, btnMaps;
     String state;
     HashMap<String, Object> map, mapLocation, mapProgram;
-
 
     @Override
 
@@ -87,6 +88,7 @@ public class HistoricalBuildingsActivity extends AppCompatActivity implements Se
         }
 
         setContentView(R.layout.listviewattractions);
+
         lvHist = findViewById(R.id.listVieAttractions);
        list  = new ArrayList<>();
        locations = new ArrayList<>();
@@ -113,6 +115,7 @@ public class HistoricalBuildingsActivity extends AppCompatActivity implements Se
                 tvProgramme = v.findViewById(R.id.tvProgramme);
                 tvPret = v.findViewById(R.id.textView10);
                 tvPret.setText("Pret:");
+                btnMaps = v.findViewById(R.id.btnMaps2);
 
                 ImageView imgAtt = v.findViewById(R.id.imageViewattraction);
                 btnTravel = v.findViewById(R.id.buttontravelplan);
@@ -175,6 +178,16 @@ public class HistoricalBuildingsActivity extends AppCompatActivity implements Se
                             Toast.makeText(HistoricalBuildingsActivity.this, "You need an account in order to give a rate!", Toast.LENGTH_LONG).show();
 
                         }
+                    }
+                });
+//
+                btnMaps.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        String source = attraction.getName();
+
+                            DisplayTrack(source);
+
                     }
                 });
 
@@ -246,7 +259,21 @@ public class HistoricalBuildingsActivity extends AppCompatActivity implements Se
     }
 
 
+    private void DisplayTrack(String source){
+        try{
+            Uri uri = Uri.parse("https://www.google.co.in/maps/search/" + source );
+            Intent intent = new Intent (Intent.ACTION_VIEW, uri);
+            intent.setPackage("com.google.android.apps.maps");
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        }catch (ActivityNotFoundException e){
+            Uri uri = Uri.parse("https://play.google.com/store/apps/details?id=com.google.apps.maps");
 
+            Intent intent2 = new Intent(Intent.ACTION_VIEW, uri);
+            intent2.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent2);
+        }
+    }
     @Override
     protected void onSaveInstanceState(Bundle outState) {
       outState.putString(APP_STATE_KEY, state);

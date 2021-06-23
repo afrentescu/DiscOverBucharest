@@ -1,6 +1,8 @@
 package com.example.user.discoverbucharest;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -33,7 +35,7 @@ public class CoffeeActivity extends AppCompatActivity {
     ListView lvCoffee;
     private FirebaseListAdapter<Attraction> adapter;
     ArrayList<String> list, newList, locations, programs, newListl, newListp;
-    Button btnTravel;
+    Button btnTravel, btnMaps, btnMenu;
     RatingBar ratingBar;
     HashMap<String, Object> map;
 
@@ -52,7 +54,7 @@ public class CoffeeActivity extends AppCompatActivity {
         final DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
 
         Query query = FirebaseDatabase.getInstance().getReference().child("attractions").child("coffees");
-        FirebaseListOptions<Attraction> options = new FirebaseListOptions.Builder<Attraction>().setLayout(R.layout.attractionlayout).setQuery(query, Attraction.class).build();
+        FirebaseListOptions<Attraction> options = new FirebaseListOptions.Builder<Attraction>().setLayout(R.layout.attractionlayout2).setQuery(query, Attraction.class).build();
         adapter = new FirebaseListAdapter(options) {
             @Override
             protected void populateView(View v, Object model, int position) {
@@ -64,6 +66,8 @@ public class CoffeeActivity extends AppCompatActivity {
                 tvProgramme = v.findViewById(R.id.tvProgramme);
                 ImageView imgAtt = v.findViewById(R.id.imageViewattraction);
                 btnTravel = v.findViewById(R.id.buttontravelplan);
+                btnMaps = v.findViewById(R.id.btnMaps2);
+                btnMenu = v.findViewById(R.id.btnMenu);
                 // model = getItem(position);
                final  Attraction attraction = (Attraction)model;
 
@@ -90,6 +94,18 @@ public class CoffeeActivity extends AppCompatActivity {
                     }
                 });
 
+                btnMaps.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        String source = attraction.getName();
+
+                        DisplayTrack(source);
+
+                    }
+                });
+
+
+
                 btnTravel.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -111,6 +127,22 @@ public class CoffeeActivity extends AppCompatActivity {
         };
         lvCoffee.setAdapter(adapter);
 
+    }
+
+    private void DisplayTrack(String source) {
+        try {
+            Uri uri = Uri.parse("https://www.google.co.in/maps/search/" + source);
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            intent.setPackage("com.google.android.apps.maps");
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            Uri uri = Uri.parse("https://play.google.com/store/apps/details?id=com.google.apps.maps");
+
+            Intent intent2 = new Intent(Intent.ACTION_VIEW, uri);
+            intent2.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent2);
+        }
     }
 
     @Override
