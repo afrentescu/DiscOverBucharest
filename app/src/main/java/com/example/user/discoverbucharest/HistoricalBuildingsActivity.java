@@ -60,7 +60,7 @@ import Classes.Attraction;
 
 public class HistoricalBuildingsActivity extends AppCompatActivity implements Serializable {
     private static final String APP_STATE_KEY = "APP_STATE_KEY";
-    TextView tvName, tvLocation, tvProgramme, tvDescription, tvPret;
+    TextView tvName, tvLocation, tvProgramme, tvDescription, tvPret, tvRate;
     ListView lvHist;
     RadioButton rbAdult, rbStudent, rbPensionar;
 
@@ -116,7 +116,7 @@ public class HistoricalBuildingsActivity extends AppCompatActivity implements Se
                 tvPret = v.findViewById(R.id.textView10);
                 tvPret.setText("Pret:");
                 btnMaps = v.findViewById(R.id.btnMaps2);
-
+                tvRate = v.findViewById(R.id.tvRate);
                 ImageView imgAtt = v.findViewById(R.id.imageViewattraction);
                 btnTravel = v.findViewById(R.id.buttontravelplan);
                 rbAdult = v.findViewById(R.id.rbAdult);
@@ -124,8 +124,8 @@ public class HistoricalBuildingsActivity extends AppCompatActivity implements Se
                 rbPensionar = v.findViewById(R.id.rbPensionar);
 
                 final  Attraction attraction = (Attraction) model;
-                tvName.setText(attraction.getName());
-
+                tvName.setText(attraction.getName() );
+                tvRate.setText(attraction.getAttractionRate() + "★");
                 tvDescription.setText("Description:\n" + attraction.getDescription());
                 tvProgramme.setText("Programme:\n" + attraction.getProgramme());
                 tvLocation.setText("Location:\n" + attraction.getLocation());
@@ -340,7 +340,7 @@ public class HistoricalBuildingsActivity extends AppCompatActivity implements Se
         notification.setTicker("You have reached the MININUN budget for your trip!");
         notification.setWhen(System.currentTimeMillis());
         notification.setContentTitle("Trip budget");
-        notification.setContentText("Minimum budget reached");
+        notification.setContentText("Minimum budget reached! Only 100 RON left from the allocated ammount!");
 
         Intent intent = new Intent(getApplicationContext(), BugdetActivity.class);
         PendingIntent pdi = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);

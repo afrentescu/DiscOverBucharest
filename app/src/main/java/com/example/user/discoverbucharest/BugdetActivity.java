@@ -333,7 +333,7 @@ public class BugdetActivity extends AppCompatActivity implements Serializable {
         notification.setTicker("You have reached the MININUN budget for your trip!");
         notification.setWhen(System.currentTimeMillis());
         notification.setContentTitle("Trip budget");
-        notification.setContentText("Minimum budget reached");
+        notification.setContentText("Minimum budget reached! Only 100 RON left from the allocated ammount!");
 
         Intent intent = new Intent(getApplicationContext(), BugdetActivity.class);
         PendingIntent pdi = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);

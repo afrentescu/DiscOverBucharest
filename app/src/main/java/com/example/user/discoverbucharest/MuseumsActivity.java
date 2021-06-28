@@ -79,14 +79,16 @@ public class MuseumsActivity extends AppCompatActivity {
             @Override
             protected void populateView(View v, Object model, int position) {
                 RatingBar ratingBar = v.findViewById(R.id.ratingBar3);
-                TextView tvName, tvLocation, tvProgramme, tvDescription, tvPret;
+                TextView tvName, tvLocation, tvProgramme, tvDescription, tvPret, tvRate;
                 final RadioButton rbAdult, rbStudent, rbPensionar;
                 tvName = v.findViewById(R.id.tvAttractionName);
                 tvLocation = v.findViewById(R.id.tvLocation);
                 tvDescription = v.findViewById(R.id.tvDescription);
                 tvProgramme = v.findViewById(R.id.tvProgramme);
+                tvRate = v.findViewById(R.id.tvRate);
                 ImageView imgAtt = v.findViewById(R.id.imageViewattraction);
                 tvPret = v.findViewById(R.id.textView10);
+
                 btnTravel = v.findViewById(R.id.buttontravelplan);
                 rbAdult = v.findViewById(R.id.rbAdult);
                 rbStudent = v.findViewById(R.id.rbStudent);
@@ -99,6 +101,7 @@ public class MuseumsActivity extends AppCompatActivity {
                 tvDescription.setText("Description:\n" + attraction.getDescription());
                 tvProgramme.setText("Programme:\n" + attraction.getProgramme());
                 tvLocation.setText("Location:\n" + attraction.getLocation());
+                tvRate.setText(attraction.getAttractionRate() + "★");
                 imgAtt.setImageResource(IMAGES[position]);
                 rbAdult.setText("Adult: " + attraction.getPriceAdult().toString() + " ron");
                 rbStudent.setText("Student: " + attraction.getPriceStudent().toString() + " ron");
@@ -247,7 +250,7 @@ public class MuseumsActivity extends AppCompatActivity {
         notification.setTicker("You have reached the MININUN budget for your trip!");
         notification.setWhen(System.currentTimeMillis());
         notification.setContentTitle("Trip budget");
-        notification.setContentText("Minimum budget reached");
+        notification.setContentText("Minimum budget reached! Only 100 RON left from the allocated ammount!");
 
         Intent intent = new Intent(getApplicationContext(), BugdetActivity.class);
         PendingIntent pdi = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);

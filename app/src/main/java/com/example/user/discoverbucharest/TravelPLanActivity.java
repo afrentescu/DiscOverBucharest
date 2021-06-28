@@ -1,9 +1,11 @@
 package com.example.user.discoverbucharest;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.Image;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -22,6 +24,7 @@ import android.widget.RatingBar;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseListAdapter;
 import com.firebase.ui.database.FirebaseListOptions;
@@ -51,15 +54,15 @@ public  class TravelPLanActivity extends AppCompatActivity {
     ListView lvTravelPlan;
     TextView tvOrder;
     TextView tvReceiveName, tvRate;
-     String value;
-     float rat;
+
+     Button btnMaps;
+     RatingBar ratingBar;
     Map<String, Object> map;
-    private Spinner spinner_order;
-    private ArrayAdapter<String> spinnerAdapter;
+
     private ArrayList<String> arrayList;
     private FirebaseListAdapter<Attraction> adapter;
 
-     RatingBar ratingBar;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -75,11 +78,7 @@ public  class TravelPLanActivity extends AppCompatActivity {
         lvTravelPlan = findViewById(R.id.lvTravelPlan);
         tvOrder= findViewById(R.id.textView4);
         tvOrder.setText("MY TRAVEL PLAN");
-      //  spinner_order = findViewById(R.id.spinnerOrder);
-     //   final String[] array = new String[]{"A->Z", "Z->A", "5★->1★", "1★->5★"};
-       // spinnerAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_item, array);
-        //spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        //spinner_order.setAdapter(spinnerAdapter);
+
         arrayList = new ArrayList();
 
         FirebaseApp.initializeApp(this);
@@ -93,14 +92,15 @@ public  class TravelPLanActivity extends AppCompatActivity {
             @Override
             protected void populateView(View v, Object model, int position) {
                TextView tvRate = v.findViewById(R.id.textView9);
-
+                btnMaps = v.findViewById(R.id.btnMapsTP);
+                ratingBar = v.findViewById(R.id.ratingBarTP);
                 tvReceiveName = v.findViewById(R.id.tvReceiveName);
                 ImageView imagev = v.findViewById(R.id.imageView2);
-               TextView tvReceiveLocation = v.findViewById(R.id.tvReceiveLocation);
+
                TextView tvReceiveProgramme = v.findViewById(R.id.tvReceiveProgramme);
                 final  Attraction attraction = (Attraction) model;
                 tvReceiveName.setText(attraction.getName());
-                tvReceiveLocation.setText("Location: \n " + attraction.getLocation());
+
                 tvReceiveProgramme.setText("Program: \n " + attraction.getProgramme());
                 if(attraction.getAttractionRate() != 0) {
                     tvRate.setText(String.valueOf(attraction.getAttractionRate()) + "★");
@@ -108,7 +108,7 @@ public  class TravelPLanActivity extends AppCompatActivity {
 
 
 
-                if(attraction.getName().equals("Romanian Atheneum")){
+               if((attraction.getName()).equals("Romanian Atheneum")){
                     imagev.setImageResource(R.drawable.ateneu);
                 }
                 if(attraction.getName().equals("Palace of the Parliament")){
@@ -252,10 +252,33 @@ public  class TravelPLanActivity extends AppCompatActivity {
                     imagev.setImageResource(R.drawable.baeasa);
                 }
 
-//                attractionList.add(attraction);
 
+                ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
+                    @Override
+                    public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
+                      final String groupId = String.valueOf(attraction.getAttractionId());
+                        attraction.setAttractionRate(rating);
+                        rating = attraction.getAttractionRate();
+                        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+                        if (currentUser != null) {
+                        //   dbRef.child("users").child(currentUser.getUid()).child("attractionToSee").child(groupId).child("rate").setValue(rating);
+                            Toast.makeText(getApplicationContext(), "Thank you for your rate!", Toast.LENGTH_LONG).show();
+                        }else{
+                            Toast.makeText(TravelPLanActivity.this, "You need an account in order to give a rate!", Toast.LENGTH_LONG).show();
 
+                        }
+                    }
+                });
 
+                btnMaps.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        String source = attraction.getName();
+
+                        DisplayTrack(source);
+
+                    }
+                });
 
             }
         };
@@ -276,6 +299,22 @@ public  class TravelPLanActivity extends AppCompatActivity {
 */
 
 
+    }
+
+    private void DisplayTrack(String source){
+        try{
+            Uri uri = Uri.parse("https://www.google.co.in/maps/search/" + source );
+            Intent intent = new Intent (Intent.ACTION_VIEW, uri);
+            intent.setPackage("com.google.android.apps.maps");
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        }catch (ActivityNotFoundException e){
+            Uri uri = Uri.parse("https://play.google.com/store/apps/details?id=com.google.apps.maps");
+
+            Intent intent2 = new Intent(Intent.ACTION_VIEW, uri);
+            intent2.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent2);
+        }
     }
 
     @Override

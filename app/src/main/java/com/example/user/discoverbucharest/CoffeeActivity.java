@@ -54,7 +54,7 @@ public class CoffeeActivity extends AppCompatActivity {
         final DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
 
         Query query = FirebaseDatabase.getInstance().getReference().child("attractions").child("coffees");
-        FirebaseListOptions<Attraction> options = new FirebaseListOptions.Builder<Attraction>().setLayout(R.layout.attractionlayout2).setQuery(query, Attraction.class).build();
+        FirebaseListOptions<Attraction> options = new FirebaseListOptions.Builder<Attraction>().setLayout(R.layout.attractionlayout).setQuery(query, Attraction.class).build();
         adapter = new FirebaseListAdapter(options) {
             @Override
             protected void populateView(View v, Object model, int position) {
@@ -66,7 +66,7 @@ public class CoffeeActivity extends AppCompatActivity {
                 tvProgramme = v.findViewById(R.id.tvProgramme);
                 ImageView imgAtt = v.findViewById(R.id.imageViewattraction);
                 btnTravel = v.findViewById(R.id.buttontravelplan);
-                btnMaps = v.findViewById(R.id.btnMaps2);
+          //      btnMaps = v.findViewById(R.id.btnMaps2);
                 btnMenu = v.findViewById(R.id.btnMenu);
                 // model = getItem(position);
                final  Attraction attraction = (Attraction)model;
@@ -93,16 +93,16 @@ public class CoffeeActivity extends AppCompatActivity {
 
                     }
                 });
-
-                btnMaps.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        String source = attraction.getName();
-
-                        DisplayTrack(source);
-
-                    }
-                });
+//
+//                btnMaps.setOnClickListener(new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View view) {
+//                        String source = attraction.getName();
+//
+//                        DisplayTrack(source);
+//
+//                    }
+//                });
 
 
 
